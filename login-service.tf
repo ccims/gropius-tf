@@ -136,12 +136,12 @@ resource "kubernetes_deployment" "login_service" {
 
           env {
             name  = "GROPIUS_LOGIN_SPECIFIC_JWT_SECRET"
-            value = random_password.login_jwt_secret
+            value = random_password.login_jwt_secret.result
           }
 
           env {
             name  = "GROPIUS_LOGIN_SYNC_API_SECRET"
-            value = random_password.sync_api_secret
+            value = random_password.sync_api_secret.result
           }
 
           env {
