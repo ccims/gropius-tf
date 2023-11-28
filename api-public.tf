@@ -1,5 +1,5 @@
 resource "random_password" "public_jwt_secret" {
-  length = 100
+  length  = 100
   special = false
 }
 

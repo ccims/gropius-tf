@@ -15,7 +15,7 @@ resource "helm_release" "neo4j_db" {
   }
 
   set {
-    name = "neo4j.name"
+    name  = "neo4j.name"
     value = "gropius"
   }
 
@@ -25,7 +25,7 @@ resource "helm_release" "neo4j_db" {
   }
 
   set {
-    name = "volumes.data.mode"
+    name  = "volumes.data.mode"
     value = "defaultStorageClass"
   }
 }

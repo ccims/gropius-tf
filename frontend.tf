@@ -46,8 +46,8 @@ resource "kubernetes_deployment" "frontend" {
           image = "ghcr.io/ccims/gropius-frontend:main"
 
           env {
-            name="LOGIN_OAUTH_CLIENT_ID"
-            value=random_uuid.default_auth_client_id.result
+            name  = "LOGIN_OAUTH_CLIENT_ID"
+            value = random_uuid.default_auth_client_id.result
           }
 
           liveness_probe {
