@@ -28,4 +28,49 @@ resource "helm_release" "neo4j_db" {
     name  = "volumes.data.mode"
     value = "defaultStorageClass"
   }
+
+  set {
+    name  ="readinessProbe.failureThreshold"
+    value = "20"
+  }
+
+  set {
+    name  ="readinessProbe.timeoutSeconds"
+    value = "100"
+  }
+
+  set {
+    name  ="readinessProbe.periodSeconds"
+    value = "50"
+  }
+
+  set {
+    name  ="livenessProbe.failureThreshold"
+    value = "40"
+  }
+
+  set {
+    name  ="livenessProbe.timeoutSeconds"
+    value = "100"
+  }
+
+  set {
+    name  ="livenessProbe.periodSeconds"
+    value = "50"
+  }
+
+  set {
+    name  ="startupProbe.failureThreshold"
+    value = "1000"
+  }
+
+  set {
+    name  ="startupProbe.periodSeconds"
+    value = "20"
+  }
+
+  set {
+    name = "services.neo4j.enabled"
+    value = "false"
+  }
 }
