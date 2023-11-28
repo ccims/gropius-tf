@@ -9,6 +9,7 @@ resource "kubernetes_service" "api_internal" {
     labels = {
       "gropius.app" = "api-internal"
     }
+    namespace = kubernetes_namespace.gropius.metadata[0].name
   }
 
   spec {
@@ -16,6 +17,10 @@ resource "kubernetes_service" "api_internal" {
       name        = "8080"
       port        = 8080
       target_port = 8080
+    }
+
+    selector = {
+      "gropius.app" = "api-internal"
     }
   }
 }
@@ -51,6 +56,11 @@ resource "kubernetes_deployment" "api_internal" {
           image = "ghcr.io/ccims/gropius-api-internal:main"
 
           env {
+            name  = "SERVER_ADDRESS"
+            value = "0.0.0.0"
+          }
+
+          env {
             name  = "GROPIUS_API_INTERNAL_API_TOKEN"
             value = random_password.internal_api_token.result
           }
@@ -81,12 +91,13 @@ resource "kubernetes_deployment" "api_internal" {
           }
 
           liveness_probe {
-            exec {
-              command = ["wget", "http://localhost:8080/graphiql", "||", "exit", "1"]
+            http_get {
+              port = "8080"
+              path = "/graphiql"
             }
             failure_threshold     = 20
-            initial_delay_seconds = 3
-            period_seconds        = 1
+            initial_delay_seconds = 120
+            period_seconds        = 5
             timeout_seconds       = 10
           }
         }

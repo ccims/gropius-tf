@@ -9,6 +9,7 @@ resource "kubernetes_service" "api_public" {
     labels = {
       "gropius.app" = "api-public"
     }
+    namespace = kubernetes_namespace.gropius.metadata[0].name
   }
 
   spec {
@@ -16,6 +17,10 @@ resource "kubernetes_service" "api_public" {
       name        = "8080"
       port        = 8080
       target_port = 8080
+    }
+
+    selector = {
+      "gropius.app" = "api-public"
     }
   }
 }
@@ -51,6 +56,11 @@ resource "kubernetes_deployment" "api_public" {
           image = "ghcr.io/ccims/gropius-api-public:main"
 
           env {
+            name  = "SERVER_ADDRESS"
+            value = "0.0.0.0"
+          }
+
+          env {
             name  = "GROPIUS_API_PUBLIC_JWT_SECRET"
             value = random_password.public_jwt_secret.result
           }
@@ -81,12 +91,13 @@ resource "kubernetes_deployment" "api_public" {
           }
 
           liveness_probe {
-            exec {
-              command = ["wget", "http://localhost:8080/graphiql", "||", "exit", "1"]
+            http_get {
+              port = "8080"
+              path = "/graphiql"
             }
             failure_threshold     = 20
-            initial_delay_seconds = 3
-            period_seconds        = 1
+            initial_delay_seconds = 120
+            period_seconds        = 5
             timeout_seconds       = 10
           }
         }

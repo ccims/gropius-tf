@@ -4,6 +4,7 @@ resource "kubernetes_service" "frontend" {
     labels = {
       "gropius.app" = "frontend"
     }
+    namespace = kubernetes_namespace.gropius.metadata[0].name
   }
 
   spec {
@@ -11,6 +12,10 @@ resource "kubernetes_service" "frontend" {
       name        = "80"
       port        = 80
       target_port = 80
+    }
+
+    selector = {
+      "gropius.app" = "frontend"
     }
   }
 }
@@ -51,12 +56,13 @@ resource "kubernetes_deployment" "frontend" {
           }
 
           liveness_probe {
-            exec {
-              command = ["wget", "http://localhost:80", "||", "exit", "1"]
+            http_get {
+              port = "80"
+              path = "/"
             }
             failure_threshold     = 20
-            initial_delay_seconds = 3
-            period_seconds        = 1
+            initial_delay_seconds = 30
+            period_seconds        = 5
             timeout_seconds       = 10
           }
         }

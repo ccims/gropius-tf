@@ -18,6 +18,7 @@ resource "kubernetes_service" "login_service" {
     labels = {
       "gropius.app" = "login-service"
     }
+    namespace = kubernetes_namespace.gropius.metadata[0].name
   }
 
   spec {
@@ -25,6 +26,10 @@ resource "kubernetes_service" "login_service" {
       name        = "3000"
       port        = 3000
       target_port = 3000
+    }
+
+    selector = {
+      "gropius.app" = "login-service"
     }
   }
 }
@@ -56,9 +61,13 @@ resource "kubernetes_deployment" "login_service" {
 
       spec {
         container {
-          name  = "login-service"
-          image = "ghcr.io/ccims/gropius-login-service:main"
+          name    = "login-service"
+          image   = "ghcr.io/ccims/gropius-login-service:main"
           command = ["/bin/sh", "-c", "npx typeorm migration:run -d dist/migrationDataSource.config.js && sleep 10 && node dist/main.js"]
+
+          port {
+            container_port = 3000
+          }
 
           env {
             name  = "GROPIUS_ACCESS_TOKEN_EXPIRATION_TIME_MS"
@@ -151,12 +160,13 @@ resource "kubernetes_deployment" "login_service" {
           }
 
           liveness_probe {
-            exec {
-              command = ["wget", "http://localhost:3000/login/strategy", "||", "exit", "1"]
+            http_get {
+              port = "3000"
+              path = "/login/strategy"
             }
             failure_threshold     = 20
-            initial_delay_seconds = 3
-            period_seconds        = 1
+            initial_delay_seconds = 60
+            period_seconds        = 5
             timeout_seconds       = 10
           }
         }
