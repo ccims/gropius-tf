@@ -54,6 +54,7 @@ resource "kubernetes_deployment" "api_internal" {
         container {
           name  = "api-internal"
           image = "ghcr.io/ccims/gropius-api-internal:main"
+          image_pull_policy = "Always"
 
           env {
             name  = "SERVER_ADDRESS"

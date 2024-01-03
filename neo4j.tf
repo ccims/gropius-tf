@@ -33,4 +33,24 @@ resource "helm_release" "neo4j_db" {
     name  = "services.neo4j.enabled"
     value = "false"
   }
+
+  set {
+    name = "neo4j.resources.memory"
+    value = "5Gi"
+  }
+
+  set {
+    name = "config.server\\.memory\\.heap\\.initial_size"
+    value = "1G"
+  }
+
+  set {
+    name = "config.server\\.memory\\.heap\\.max_size"
+    value = "3G"
+  }
+
+  set {
+    name = "config.server\\.memory\\.pagecache\\.size"
+    value = "1G"
+  }
 }

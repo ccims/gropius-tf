@@ -49,6 +49,7 @@ resource "kubernetes_deployment" "frontend" {
         container {
           name  = "frontend"
           image = "ghcr.io/ccims/gropius-frontend:main"
+          image_pull_policy = "Always"
 
           env {
             name  = "LOGIN_OAUTH_CLIENT_ID"
