@@ -40,6 +40,11 @@ resource "helm_release" "neo4j_db" {
   }
 
   set {
+    name = "neo4j.resources.cpu"
+    value = "1.5"
+  }
+
+  set {
     name = "config.server\\.memory\\.heap\\.initial_size"
     value = "1G"
   }

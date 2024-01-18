@@ -56,6 +56,15 @@ resource "kubernetes_deployment" "api_public" {
           image = "ghcr.io/ccims/gropius-api-public:main"
           image_pull_policy = "Always"
 
+          resources {
+            requests = {
+              cpu    = "1.5"
+            }
+            limits = {
+              cpu    = "1.5"
+            }
+          }
+
           env {
             name  = "SERVER_ADDRESS"
             value = "0.0.0.0"
