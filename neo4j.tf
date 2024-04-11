@@ -15,6 +15,16 @@ resource "helm_release" "neo4j_db" {
   }
 
   set {
+    name  = "image.customImage"
+    value = "ghcr.io/graphglue/neo4j:main"
+  }
+
+  set {
+    name  = "image.imagePullPolicy"
+    value = "Always"
+  }
+
+  set {
     name  = "neo4j.name"
     value = "gropius"
   }

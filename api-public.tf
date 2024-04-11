@@ -72,6 +72,11 @@ resource "kubernetes_deployment" "api_public" {
           }
 
           env {
+            name  = "GRAPHGLUE_CORE_USE_NEO4J_PLUGIN"
+            value = "true"
+          }
+
+          env {
             name  = "LOGGING_LEVEL_ROOT"
             value = "ERROR"
           }
