@@ -56,6 +56,16 @@ resource "kubernetes_deployment" "frontend" {
             value = random_uuid.default_auth_client_id.result
           }
 
+          env {
+            name = "LOGIN_SERVICE_ENDPOINT"
+            value = "http://login-service:3000"
+          }
+
+          env {
+            name = "API_PUBLIC_ENDPOINT"
+            value = "http://api-public:8080/graphql"
+          }
+
           liveness_probe {
             http_get {
               port = "80"
