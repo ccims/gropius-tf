@@ -1,16 +1,26 @@
-resource "random_uuid" "default_auth_client_id" {
-
-}
-
-resource "random_password" "login_jwt_secret" {
-  length  = 100
-  special = false
-}
-
 resource "random_password" "sync_api_secret" {
   length  = 20
   special = true
 }
+
+resource "tls_private_key" "oauth_key" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+resource "tls_private_key" "login_specific_key" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+output "oauth_public_key_pem" {
+  value = tls_private_key.oauth_key.public_key_pem
+}
+
+output "login_specific_public_key_pem" {
+  value = tls_private_key.login_specific_key.public_key_pem
+}
+
 
 resource "kubernetes_service" "login_service" {
   metadata {
@@ -61,10 +71,10 @@ resource "kubernetes_deployment" "login_service" {
 
       spec {
         container {
-          name    = "login-service"
-          image   = "ghcr.io/ccims/gropius-login-service:main"
+          name              = "login-service"
+          image             = "ghcr.io/ccims/gropius-login-service:main"
           image_pull_policy = "Always"
-          command = ["/bin/sh", "-c", "npx typeorm migration:run -d dist/migrationDataSource.config.js && sleep 10 && node dist/main.js"]
+          command           = ["/bin/sh", "-c", "npx typeorm migration:run -d dist/migrationDataSource.config.js && sleep 10 && node dist/main.js"]
 
           port {
             container_port = 3000
@@ -73,16 +83,6 @@ resource "kubernetes_deployment" "login_service" {
           env {
             name  = "GROPIUS_ACCESS_TOKEN_EXPIRATION_TIME_MS"
             value = "600000"
-          }
-
-          env {
-            name  = "GROPIUS_DEFAULT_AUTH_CLIENT_ID"
-            value = random_uuid.default_auth_client_id.result
-          }
-
-          env {
-            name  = "GROPIUS_DEFAULT_AUTH_CLIENT_NAME"
-            value = "initial-client"
           }
 
           env {
@@ -111,6 +111,11 @@ resource "kubernetes_deployment" "login_service" {
           }
 
           env {
+            name  = "GROPIUS_ENDPOINT"
+            value = var.gropius_endpoint
+          }
+
+          env {
             name  = "GROPIUS_DEFAULT_USER_STRATEGY_INSTANCE_NAME"
             value = "userpass-local"
           }
@@ -123,11 +128,6 @@ resource "kubernetes_deployment" "login_service" {
           env {
             name  = "GROPIUS_INTERNAL_BACKEND_ENDPOINT"
             value = "http://api-internal:8080/graphql"
-          }
-
-          env {
-            name  = "GROPIUS_INTERNAL_BACKEND_JWT_SECRET"
-            value = random_password.public_jwt_secret.result
           }
 
           env {
@@ -146,13 +146,28 @@ resource "kubernetes_deployment" "login_service" {
           }
 
           env {
-            name  = "GROPIUS_LOGIN_SPECIFIC_JWT_SECRET"
-            value = random_password.login_jwt_secret.result
+            name  = "GROPIUS_LOGIN_SYNC_API_SECRET"
+            value = random_password.sync_api_secret.result
           }
 
           env {
-            name  = "GROPIUS_LOGIN_SYNC_API_SECRET"
-            value = random_password.sync_api_secret.result
+            name  = "GROPIUS_OAUTH_PUBLIC_KEY"
+            value = base64encode(tls_private_key.oauth_key.public_key_pem)
+          }
+
+          env {
+            name  = "GROPIUS_LOGIN_SPECIFIC_PUBLIC_KEY"
+            value = base64encode(tls_private_key.login_specific_key.public_key_pem)
+          }
+
+          env {
+            name  = "GROPIUS_OAUTH_PRIVATE_KEY"
+            value = base64encode(tls_private_key.oauth_key.private_key_pem)
+          }
+
+          env {
+            name  = "GROPIUS_LOGIN_SPECIFIC_PRIVATE_KEY"
+            value = base64encode(tls_private_key.login_specific_key.private_key_pem)
           }
 
           env {
@@ -163,7 +178,7 @@ resource "kubernetes_deployment" "login_service" {
           liveness_probe {
             http_get {
               port = "3000"
-              path = "/login/strategy"
+              path = "/auth/api/login/strategy"
             }
             failure_threshold     = 20
             initial_delay_seconds = 60

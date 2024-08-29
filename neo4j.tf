@@ -20,7 +20,7 @@ resource "helm_release" "neo4j_db" {
   }
 
   set {
-    name  = "image.imagePullPolicy"
+    name = "image.imagePullPolicy"
     value = "Always"
   }
 
@@ -36,7 +36,20 @@ resource "helm_release" "neo4j_db" {
 
   set {
     name  = "volumes.data.mode"
-    value = "defaultStorageClass"
+    value = var.storage_class != null ? "dynamic" : "defaultStorageClass"
+  }
+
+  dynamic "set" {
+    for_each = var.storage_class != null ? [var.storage_class] : []
+    content {
+      name  = "volumes.data.dynamic.storageClassName"
+      value = set.value
+    }
+  }
+
+  set {
+    name  = "volumes.data.dynamic.requests.storage"
+    value = "5Gi"
   }
 
   set {
@@ -45,27 +58,27 @@ resource "helm_release" "neo4j_db" {
   }
 
   set {
-    name = "neo4j.resources.memory"
+    name  = "neo4j.resources.memory"
     value = "5Gi"
   }
 
   set {
-    name = "neo4j.resources.cpu"
-    value = "1.5"
+    name  = "neo4j.resources.cpu"
+    value = "0.5"
   }
 
   set {
-    name = "config.server\\.memory\\.heap\\.initial_size"
+    name  = "config.server\\.memory\\.heap\\.initial_size"
     value = "1G"
   }
 
   set {
-    name = "config.server\\.memory\\.heap\\.max_size"
+    name  = "config.server\\.memory\\.heap\\.max_size"
     value = "3G"
   }
 
   set {
-    name = "config.server\\.memory\\.pagecache\\.size"
+    name  = "config.server\\.memory\\.pagecache\\.size"
     value = "1G"
   }
 }

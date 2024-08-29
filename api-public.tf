@@ -52,9 +52,10 @@ resource "kubernetes_deployment" "api_public" {
 
       spec {
         container {
-          name  = "api-public"
-          image = "ghcr.io/ccims/gropius-api-public:main"
+          name              = "api-public"
+          image             = "ghcr.io/ccims/gropius-api-public:main"
           image_pull_policy = "Always"
+
 
           env {
             name  = "SERVER_ADDRESS"
@@ -74,6 +75,11 @@ resource "kubernetes_deployment" "api_public" {
           env {
             name  = "GRAPHGLUE_CORE_USE_NEO4J_PLUGIN"
             value = "true"
+          }
+
+          env {
+            name  = "GROPIUS_API_PUBLIC_JWT_PUBLIC_KEY"
+            value = base64encode(tls_private_key.oauth_key.public_key_pem)
           }
 
           env {

@@ -14,6 +14,14 @@ resource "helm_release" "postgres_db" {
     value = "gropius"
   }
 
+  dynamic "set" {
+    for_each = var.storage_class != null ? [var.storage_class] : []
+    content {
+      name  = "global.storageClass"
+      value = set.value
+    }
+  }
+
   set {
     name  = "postgres.auth.enablePostgresUser"
     value = "false"

@@ -1,10 +1,16 @@
+locals {
+  gropius_host = regex("(https?://)?([^/]+)", var.gropius_endpoint)[1]
+}
+
 resource "kubernetes_ingress_v1" "gropius_ingress" {
+  count = var.gropius_endpoint != "" && startswith(var.gropius_endpoint, "https://") && var.enable_ingress ? 1 : 0
+
   metadata {
     name      = "gropius-ingress"
     namespace = kubernetes_namespace.gropius.metadata[0].name
     annotations = {
-        "cert-manager.io/cluster-issuer": "letsencrypt-production"
-        "kubernetes.io/ingress.class": "nginx"
+      "cert-manager.io/cluster-issuer" : "letsencrypt-production"
+      "kubernetes.io/ingress.class" : "nginx"
     }
   }
 
@@ -20,7 +26,7 @@ resource "kubernetes_ingress_v1" "gropius_ingress" {
 
     rule {
 
-      host = "frontend.gropius.duckdns.org"
+      host = local.gropius_host
       http {
         path {
           backend {
@@ -37,8 +43,8 @@ resource "kubernetes_ingress_v1" "gropius_ingress" {
     }
 
     tls {
-      hosts = ["frontend.gropius.duckdns.org"]
-      secret_name = "frontend.gropius.duckdns.org-tls"
+      hosts       = [local.gropius_host]
+      secret_name = "${local.gropius_host}-tls"
     }
   }
 }

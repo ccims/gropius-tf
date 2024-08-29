@@ -1,35 +1,10 @@
-resource "random_password" "internal_api_token" {
-  length  = 20
-  special = true
-}
+resource "kubernetes_deployment" "sync_jira" {
+  count = var.sync_jira ? 1 : 0
 
-resource "kubernetes_service" "api_internal" {
   metadata {
-    name = "api-internal"
+    name = "sync-jira"
     labels = {
-      "gropius.app" = "api-internal"
-    }
-    namespace = kubernetes_namespace.gropius.metadata[0].name
-  }
-
-  spec {
-    port {
-      name        = "8080"
-      port        = 8080
-      target_port = 8080
-    }
-
-    selector = {
-      "gropius.app" = "api-internal"
-    }
-  }
-}
-
-resource "kubernetes_deployment" "api_internal" {
-  metadata {
-    name = "api-internal"
-    labels = {
-      "gropius.app" = "api-internal"
+      "gropius.app" = "sync-jira"
     }
     namespace = kubernetes_namespace.gropius.metadata[0].name
   }
@@ -39,32 +14,23 @@ resource "kubernetes_deployment" "api_internal" {
 
     selector {
       match_labels = {
-        "gropius.app" = "api-internal"
+        "gropius.app" = "sync-jira"
       }
     }
 
     template {
       metadata {
         labels = {
-          "gropius.app" = "api-internal"
+          "gropius.app" = "sync-jira"
         }
       }
 
       spec {
         container {
-          name              = "api-internal"
-          image             = "ghcr.io/ccims/gropius-api-internal:main"
+          name              = "sync-jira"
+          image             = "ghcr.io/ccims/gropius-jira:main"
           image_pull_policy = "Always"
 
-          env {
-            name  = "SERVER_ADDRESS"
-            value = "0.0.0.0"
-          }
-
-          env {
-            name  = "GROPIUS_API_INTERNAL_API_TOKEN"
-            value = random_password.internal_api_token.result
-          }
 
           env {
             name  = "GROPIUS_CORE_CREATE_INDICES_ON_STARTUP"
@@ -78,7 +44,7 @@ resource "kubernetes_deployment" "api_internal" {
 
           env {
             name  = "LOGGING_LEVEL_ROOT"
-            value = "ERROR"
+            value = "INFO"
           }
 
           env {
@@ -96,10 +62,44 @@ resource "kubernetes_deployment" "api_internal" {
             value = "bolt://neo4j-db:7687"
           }
 
+          env {
+            name  = "SPRING_DATA_MONGODB_HOST"
+            value = "mongodb"
+          }
+
+          env {
+            name  = "SPRING_DATA_MONGODB_PORT"
+            value = "27017"
+          }
+
+          env {
+            name  = "SPRING_DATA_MONGODB_DATABASE"
+            value = "gropius"
+          }
+
+          env {
+            name  = "SPRING_DATA_MONGODB_USERNAME"
+            value = "gropius"
+          }
+
+          env {
+            name  = "SPRING_DATA_MONGODB_PASSWORD"
+            value = random_password.mongo_password.result
+          }
+
+          env {
+            name  = "GROPIUS_SYNC_LOGIN_SERVICE_BASE"
+            value = "http://login-service:3000"
+          }
+
+          env {
+            name  = "GROPIUS_SYNC_API_SECRET"
+            value = random_password.sync_api_secret.result
+          }
+
           liveness_probe {
-            http_get {
-              port = "8080"
-              path = "/graphiql"
+            exec {
+              command = ["true"]
             }
             failure_threshold     = 20
             initial_delay_seconds = 120

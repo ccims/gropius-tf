@@ -47,22 +47,17 @@ resource "kubernetes_deployment" "frontend" {
 
       spec {
         container {
-          name  = "frontend"
-          image = "ghcr.io/ccims/gropius-frontend:main"
+          name              = "frontend"
+          image             = "ghcr.io/ccims/gropius-frontend:main"
           image_pull_policy = "Always"
 
           env {
-            name  = "LOGIN_OAUTH_CLIENT_ID"
-            value = random_uuid.default_auth_client_id.result
-          }
-
-          env {
-            name = "LOGIN_SERVICE_ENDPOINT"
+            name  = "LOGIN_SERVICE_ENDPOINT"
             value = "http://login-service:3000"
           }
 
           env {
-            name = "API_PUBLIC_ENDPOINT"
+            name  = "API_PUBLIC_ENDPOINT"
             value = "http://api-public:8080/graphql"
           }
 
