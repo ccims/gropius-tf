@@ -20,7 +20,7 @@ resource "helm_release" "neo4j_db" {
   }
 
   set {
-    name = "image.imagePullPolicy"
+    name  = "image.imagePullPolicy"
     value = "Always"
   }
 

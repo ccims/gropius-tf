@@ -18,7 +18,7 @@ resource "helm_release" "mongodb" {
   }
 
   set {
-    name = "auth.rootPassword"
+    name  = "auth.rootPassword"
     value = random_password.mongo_root_password.result
   }
 

@@ -9,6 +9,6 @@ provider "helm" {
 
 resource "kubernetes_namespace" "gropius" {
   metadata {
-    name = "gropius"
+    name = var.namespace
   }
 }

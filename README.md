@@ -16,6 +16,7 @@ Below are the input variables used in this deployment:
 | Variable           | Type   | Description                                                                            | Default Value           |
 | ------------------ | ------ | -------------------------------------------------------------------------------------- | ----------------------- |
 | `admin_password`   | string | The password for the admin user                                                        | `admin`                 |
+| `namespace`        | string | The k8s namespace to deploy the application in                                         | `gropius`               |
 | `gropius_endpoint` | string | The host URL of the Gropius frontend                                                   | `http://localhost:4200` |
 | `enable_ingress`   | bool   | Whether to enable ingress (only relevant if `gropius_endpoint` starts with `https://`) | `false`                 |
 | `sync_github`      | bool   | Whether to sync the GitHub repositories                                                | `false`                 |
@@ -72,7 +73,7 @@ Below are the input variables used in this deployment:
     ```bash
     kubectl -n gropius port-forward service/frontend 4200:80
     ```
-    
+
     Then, open your browser and navigate to `http://localhost:4200`.
 
 ## Cleanup

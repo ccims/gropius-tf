@@ -4,6 +4,12 @@ variable "admin_password" {
   default     = "admin"
 }
 
+variable "namespace" {
+  type        = string
+  description = "The k8s namespace to deploy the application in"
+  default     = "gropius"
+}
+
 variable "gropius_endpoint" {
   type        = string
   description = "The host url of gropius frontend"
@@ -31,12 +37,12 @@ variable "sync_jira" {
 variable "storage_class" {
   type        = string
   description = "The storage class to use for all databases"
-  nullable = true
-  default = null
+  nullable    = true
+  default     = null
 }
 
 variable "kubeconfig" {
   type        = string
   description = "The kubeconfig file to use for kubectl"
-  default = "./kubeconfig.yaml"
+  default     = "./kubeconfig.yaml"
 }
