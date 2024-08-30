@@ -1,4 +1,4 @@
-resource "random_password" "mongo_password" {
+resource "random_password" "mongo_root_password" {
   length  = 32
   special = false
 }
@@ -18,23 +18,18 @@ resource "helm_release" "mongodb" {
   }
 
   set {
-    name  = "auth.username"
+    name = "auth.rootPassword"
+    value = random_password.mongo_root_password.result
+  }
+
+  set {
+    name  = "auth.databases[0]"
     value = "gropius"
   }
 
   set {
-    name  = "auth.password"
-    value = random_password.mongo_password.result
-  }
-
-  set {
-    name  = "auth.database"
+    name  = "auth.usernames[0]"
     value = "gropius"
-  }
-
-  set {
-    name  = "replicaSet.enabled"
-    value = "false"
   }
 
   dynamic "set" {

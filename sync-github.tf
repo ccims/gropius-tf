@@ -1,10 +1,10 @@
-resource "kubernetes_deployment" "sync_jira" {
-  count = var.sync_jira ? 1 : 0
+resource "kubernetes_deployment" "sync_github" {
+  count = var.sync_github ? 1 : 0
 
   metadata {
-    name = "sync-jira"
+    name = "sync-github"
     labels = {
-      "gropius.app" = "sync-jira"
+      "gropius.app" = "sync-github"
     }
     namespace = kubernetes_namespace.gropius.metadata[0].name
   }
@@ -14,21 +14,21 @@ resource "kubernetes_deployment" "sync_jira" {
 
     selector {
       match_labels = {
-        "gropius.app" = "sync-jira"
+        "gropius.app" = "sync-github"
       }
     }
 
     template {
       metadata {
         labels = {
-          "gropius.app" = "sync-jira"
+          "gropius.app" = "sync-github"
         }
       }
 
       spec {
         container {
-          name              = "sync-jira"
-          image             = "ghcr.io/ccims/gropius-jira:main"
+          name              = "sync-github"
+          image             = "ghcr.io/ccims/gropius-github:main"
           image_pull_policy = "Always"
 
 
