@@ -16,6 +16,12 @@ variable "gropius_endpoint" {
   default     = "http://localhost:4200"
 }
 
+variable "gropius_version" {
+  type        = string
+  description = "The version of gropius to deploy"
+  default     = "latest"
+}
+
 variable "enable_ingress" {
   type        = bool
   description = "Whether to enable the ingress, only relevant if gropius_endpoint starts with https://"

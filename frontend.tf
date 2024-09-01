@@ -48,7 +48,7 @@ resource "kubernetes_deployment" "frontend" {
       spec {
         container {
           name              = "frontend"
-          image             = "ghcr.io/ccims/gropius-frontend:main"
+          image             = "ghcr.io/ccims/gropius-frontend:${var.gropius_version}"
           image_pull_policy = "Always"
 
           env {

@@ -53,7 +53,7 @@ resource "kubernetes_deployment" "api_public" {
       spec {
         container {
           name              = "api-public"
-          image             = "ghcr.io/ccims/gropius-api-public:main"
+          image             = "ghcr.io/ccims/gropius-api-public:${var.gropius_version}"
           image_pull_policy = "Always"
 
 

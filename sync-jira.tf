@@ -28,7 +28,7 @@ resource "kubernetes_deployment" "sync_jira" {
       spec {
         container {
           name              = "sync-jira"
-          image             = "ghcr.io/ccims/gropius-jira:main"
+          image             = "ghcr.io/ccims/gropius-jira:${var.gropius_version}"
           image_pull_policy = "Always"
 
 

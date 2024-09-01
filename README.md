@@ -18,6 +18,7 @@ Below are the input variables used in this deployment:
 | `admin_password`   | string | The password for the admin user                                                        | `admin`                 |
 | `namespace`        | string | The k8s namespace to deploy the application in                                         | `gropius`               |
 | `gropius_endpoint` | string | The host URL of the Gropius frontend                                                   | `http://localhost:4200` |
+| `gropius_version`  | string | The version of Gropius to deploy                                                       | `latest`                |
 | `enable_ingress`   | bool   | Whether to enable ingress (only relevant if `gropius_endpoint` starts with `https://`) | `false`                 |
 | `sync_github`      | bool   | Whether to sync the GitHub repositories                                                | `false`                 |
 | `sync_jira`        | bool   | Whether to sync the Jira issues                                                        | `false`                 |

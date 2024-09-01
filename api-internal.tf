@@ -53,7 +53,7 @@ resource "kubernetes_deployment" "api_internal" {
       spec {
         container {
           name              = "api-internal"
-          image             = "ghcr.io/ccims/gropius-api-internal:main"
+          image             = "ghcr.io/ccims/gropius-api-internal:${var.gropius_version}"
           image_pull_policy = "Always"
 
           env {

@@ -72,7 +72,7 @@ resource "kubernetes_deployment" "login_service" {
       spec {
         container {
           name              = "login-service"
-          image             = "ghcr.io/ccims/gropius-login-service:main"
+          image             = "ghcr.io/ccims/gropius-login-service:${var.gropius_version}"
           image_pull_policy = "Always"
           command           = ["/bin/sh", "-c", "npx typeorm migration:run -d dist/migrationDataSource.config.js && sleep 10 && node dist/main.js"]
 

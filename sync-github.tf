@@ -28,7 +28,7 @@ resource "kubernetes_deployment" "sync_github" {
       spec {
         container {
           name              = "sync-github"
-          image             = "ghcr.io/ccims/gropius-github:main"
+          image             = "ghcr.io/ccims/gropius-github:${var.gropius_version}"
           image_pull_policy = "Always"
 
 
