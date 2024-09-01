@@ -28,6 +28,12 @@ variable "enable_ingress" {
   default     = false
 }
 
+variable "generate_login_service_keys" {
+  type        = bool
+  description = "If true, the two private public key pairs for the login service will be generated and stored in k8s secrets. If false, this secret must be created manually (see README)."
+  default     = true
+}
+
 variable "sync_github" {
   type        = bool
   description = "Whether to sync the github repositories"

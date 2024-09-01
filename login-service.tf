@@ -22,15 +22,34 @@ resource "kubernetes_secret" "login_service_secrets" {
 }
 
 resource "tls_private_key" "oauth_key" {
+  count = var.generate_login_service_keys ? 1 : 0
+
   algorithm = "RSA"
   rsa_bits  = 2048
 }
 
 resource "tls_private_key" "login_specific_key" {
+  count = var.generate_login_service_keys ? 1 : 0
+
   algorithm = "RSA"
   rsa_bits  = 2048
 }
 
+resource "kubernetes_secret" "login_service_keys" {
+  count = var.generate_login_service_keys ? 1 : 0
+
+  metadata {
+    name      = "login-service-keys"
+    namespace = kubernetes_namespace.gropius.metadata[0].name
+  }
+
+  data = {
+    oauth_public_key           = base64encode(tls_private_key.oauth_key[0].public_key_pem)
+    oauth_private_key          = base64encode(tls_private_key.oauth_key[0].private_key_pem)
+    login_specific_public_key  = base64encode(tls_private_key.login_specific_key[0].public_key_pem)
+    login_specific_private_key = base64encode(tls_private_key.login_specific_key[0].private_key_pem)
+  }
+}
 
 resource "kubernetes_service" "login_service" {
   metadata {
@@ -181,23 +200,43 @@ resource "kubernetes_deployment" "login_service" {
           }
 
           env {
-            name  = "GROPIUS_OAUTH_PUBLIC_KEY"
-            value = base64encode(tls_private_key.oauth_key.public_key_pem)
+            name = "GROPIUS_OAUTH_PUBLIC_KEY"
+            value_from {
+              secret_key_ref {
+                name = "login-service-keys"
+                key  = "oauth_public_key"
+              }
+            }
           }
 
           env {
-            name  = "GROPIUS_LOGIN_SPECIFIC_PUBLIC_KEY"
-            value = base64encode(tls_private_key.login_specific_key.public_key_pem)
+            name = "GROPIUS_LOGIN_SPECIFIC_PUBLIC_KEY"
+            value_from {
+              secret_key_ref {
+                name = "login-service-keys"
+                key  = "login_specific_public_key"
+              }
+            }
           }
 
           env {
-            name  = "GROPIUS_OAUTH_PRIVATE_KEY"
-            value = base64encode(tls_private_key.oauth_key.private_key_pem)
+            name = "GROPIUS_OAUTH_PRIVATE_KEY"
+            value_from {
+              secret_key_ref {
+                name = "login-service-keys"
+                key  = "oauth_private_key"
+              }
+            }
           }
 
           env {
-            name  = "GROPIUS_LOGIN_SPECIFIC_PRIVATE_KEY"
-            value = base64encode(tls_private_key.login_specific_key.private_key_pem)
+            name = "GROPIUS_LOGIN_SPECIFIC_PRIVATE_KEY"
+            value_from {
+              secret_key_ref {
+                name = "login-service-keys"
+                key  = "login_specific_private_key"
+              }
+            }
           }
 
           env {

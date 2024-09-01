@@ -13,17 +13,18 @@ This deployment leverages Kubernetes as the underlying infrastructure and can be
 
 Below are the input variables used in this deployment:
 
-| Variable           | Type   | Description                                                                            | Default Value           |
-| ------------------ | ------ | -------------------------------------------------------------------------------------- | ----------------------- |
-| `admin_password`   | string | The password for the admin user                                                        | `admin`                 |
-| `namespace`        | string | The k8s namespace to deploy the application in                                         | `gropius`               |
-| `gropius_endpoint` | string | The host URL of the Gropius frontend                                                   | `http://localhost:4200` |
-| `gropius_version`  | string | The version of Gropius to deploy                                                       | `latest`                |
-| `enable_ingress`   | bool   | Whether to enable ingress (only relevant if `gropius_endpoint` starts with `https://`) | `false`                 |
-| `sync_github`      | bool   | Whether to sync the GitHub repositories                                                | `false`                 |
-| `sync_jira`        | bool   | Whether to sync the Jira issues                                                        | `false`                 |
-| `storage_class`    | string | The storage class to use for all databases (nullable)                                  | `null`                  |
-| `kubeconfig`       | string | The kubeconfig file to use for `kubectl`                                               | `./kubeconfig.yaml`     |
+| Variable                      | Type   | Description                                                                                                                                                               | Default Value           |
+| ----------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| `admin_password`              | string | The password for the admin user                                                                                                                                           | `admin`                 |
+| `namespace`                   | string | The k8s namespace to deploy the application in                                                                                                                            | `gropius`               |
+| `gropius_endpoint`            | string | The host URL of the Gropius frontend                                                                                                                                      | `http://localhost:4200` |
+| `gropius_version`             | string | The version of Gropius to deploy                                                                                                                                          | `latest`                |
+| `enable_ingress`              | bool   | Whether to enable ingress (only relevant if `gropius_endpoint` starts with `https://`)                                                                                    | `false`                 |
+| `generate_login_service_keys` | bool   | If true, the two private public key pairs for the login service will be generated and stored in k8s secrets. If false, this secret must be created manually (see README). | `true`                  |
+| `sync_github`                 | bool   | Whether to sync the GitHub repositories                                                                                                                                   | `false`                 |
+| `sync_jira`                   | bool   | Whether to sync the Jira issues                                                                                                                                           | `false`                 |
+| `storage_class`               | string | The storage class to use for all databases (nullable)                                                                                                                     | `null`                  |
+| `kubeconfig`                  | string | The kubeconfig file to use for `kubectl`                                                                                                                                  | `./kubeconfig.yaml`     |
 
 ## Deployment Steps
 
@@ -86,3 +87,26 @@ terraform destroy
 ```
 
 This will remove all resources created by this Terraform configuration.
+
+## Login Service Keys
+
+By default, the Terraform configuration generates the private and public keys for the login service and stores them in Kubernetes secrets.
+However, for production deployments, it is recommended to generate these keys manually and provide them outside of Terraform.
+To do this, set the `generate_login_service_keys` variable to `false` and create the following Kubernetes secret:
+
+```yaml
+apiVersion: v1
+data:
+  login_specific_private_key: TODO
+  login_specific_public_key: TODO
+  oauth_private_key: TODO
+  oauth_public_key: TODO
+kind: Secret
+metadata:
+  name: login-service-keys
+  namespace: gropius
+type: Opaque
+```
+
+Note that both the private and public keys must be in base-64 encoded PEM format.
+Also, you might need to adjust the namespace if you are using a different one.

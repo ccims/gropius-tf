@@ -68,8 +68,13 @@ resource "kubernetes_deployment" "api_public" {
           }
 
           env {
-            name  = "GROPIUS_API_PUBLIC_JWT_PUBLIC_KEY"
-            value = base64encode(tls_private_key.oauth_key.public_key_pem)
+            name = "GROPIUS_API_PUBLIC_JWT_PUBLIC_KEY"
+            value_from {
+              secret_key_ref {
+                name = "login-service-keys"
+                key  = "oauth_public_key"
+              }
+            }
           }
 
           env {
@@ -78,7 +83,7 @@ resource "kubernetes_deployment" "api_public" {
           }
 
           env {
-            name  = "SPRING_NEO4J_AUTHENTICATION_PASSWORD"
+            name = "SPRING_NEO4J_AUTHENTICATION_PASSWORD"
             value_from {
               secret_key_ref {
                 name = kubernetes_secret.neo4j_password_secret.metadata[0].name
