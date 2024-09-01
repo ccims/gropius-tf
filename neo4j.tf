@@ -3,6 +3,17 @@ resource "random_password" "neo4j_password" {
   special = true
 }
 
+resource "kubernetes_secret" "neo4j_password_secret" {
+  metadata {
+    name      = "neo4j-password"
+    namespace = kubernetes_namespace.gropius.metadata[0].name
+  }
+
+  data = {
+    password = random_password.neo4j_password.result
+  }
+}
+
 resource "helm_release" "neo4j_db" {
   name       = "neo4j-db"
   repository = "https://helm.neo4j.com/neo4j"

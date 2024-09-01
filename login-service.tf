@@ -3,6 +3,24 @@ resource "random_password" "sync_api_secret" {
   special = true
 }
 
+resource "random_password" "internal_api_token" {
+  length  = 20
+  special = true
+}
+
+resource "kubernetes_secret" "login_service_secrets" {
+  metadata {
+    name      = "login-service-secrets"
+    namespace = kubernetes_namespace.gropius.metadata[0].name
+  }
+
+  data = {
+    sync_api_secret                = random_password.sync_api_secret.result
+    internal_api_token             = random_password.internal_api_token.result
+    gropius_default_user_post_data = "{\"password\":\"${var.admin_password}\"}"
+  }
+}
+
 resource "tls_private_key" "oauth_key" {
   algorithm = "RSA"
   rsa_bits  = 2048
@@ -11,14 +29,6 @@ resource "tls_private_key" "oauth_key" {
 resource "tls_private_key" "login_specific_key" {
   algorithm = "RSA"
   rsa_bits  = 2048
-}
-
-output "oauth_public_key_pem" {
-  value = tls_private_key.oauth_key.public_key_pem
-}
-
-output "login_specific_public_key_pem" {
-  value = tls_private_key.login_specific_key.public_key_pem
 }
 
 
@@ -106,8 +116,13 @@ resource "kubernetes_deployment" "login_service" {
           }
 
           env {
-            name  = "GROPIUS_DEFAULT_USER_POST_DATA"
-            value = "{\"password\":\"${var.admin_password}\"}"
+            name = "GROPIUS_DEFAULT_USER_POST_DATA"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret.login_service_secrets.metadata[0].name
+                key  = "gropius_default_user_post_data"
+              }
+            }
           }
 
           env {
@@ -131,8 +146,13 @@ resource "kubernetes_deployment" "login_service" {
           }
 
           env {
-            name  = "GROPIUS_INTERNAL_BACKEND_TOKEN"
-            value = random_password.internal_api_token.result
+            name = "GROPIUS_INTERNAL_BACKEND_TOKEN"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret.login_service_secrets.metadata[0].name
+                key  = "internal_api_token"
+              }
+            }
           }
 
           env {
@@ -141,13 +161,23 @@ resource "kubernetes_deployment" "login_service" {
           }
 
           env {
-            name  = "GROPIUS_LOGIN_DATABASE_PASSWORD"
-            value = random_password.postgres_password.result
+            name = "GROPIUS_LOGIN_DATABASE_PASSWORD"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret.postgres_password_secret.metadata[0].name
+                key  = "password"
+              }
+            }
           }
 
           env {
-            name  = "GROPIUS_LOGIN_SYNC_API_SECRET"
-            value = random_password.sync_api_secret.result
+            name = "GROPIUS_LOGIN_SYNC_API_SECRET"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret.login_service_secrets.metadata[0].name
+                key  = "sync_api_secret"
+              }
+            }
           }
 
           env {

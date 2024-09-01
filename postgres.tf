@@ -3,6 +3,17 @@ resource "random_password" "postgres_password" {
   special = false
 }
 
+resource "kubernetes_secret" "postgres_password_secret" {
+  metadata {
+    name      = "postgres-password"
+    namespace = kubernetes_namespace.gropius.metadata[0].name
+  }
+
+  data = {
+    password = random_password.postgres_password.result
+  }
+}
+
 resource "helm_release" "postgres_db" {
   name       = "postgres-db"
   repository = "oci://registry-1.docker.io/bitnamicharts"

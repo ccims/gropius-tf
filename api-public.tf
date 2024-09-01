@@ -1,8 +1,3 @@
-resource "random_password" "public_jwt_secret" {
-  length  = 100
-  special = false
-}
-
 resource "kubernetes_service" "api_public" {
   metadata {
     name = "api-public"
@@ -63,11 +58,6 @@ resource "kubernetes_deployment" "api_public" {
           }
 
           env {
-            name  = "GROPIUS_API_PUBLIC_JWT_SECRET"
-            value = random_password.public_jwt_secret.result
-          }
-
-          env {
             name  = "GROPIUS_CORE_CREATE_INDICES_ON_STARTUP"
             value = "true"
           }
@@ -89,7 +79,12 @@ resource "kubernetes_deployment" "api_public" {
 
           env {
             name  = "SPRING_NEO4J_AUTHENTICATION_PASSWORD"
-            value = random_password.neo4j_password.result
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret.neo4j_password_secret.metadata[0].name
+                key  = "password"
+              }
+            }
           }
 
           env {

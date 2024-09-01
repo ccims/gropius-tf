@@ -1,8 +1,3 @@
-resource "random_password" "internal_api_token" {
-  length  = 20
-  special = true
-}
-
 resource "kubernetes_service" "api_internal" {
   metadata {
     name = "api-internal"
@@ -62,8 +57,13 @@ resource "kubernetes_deployment" "api_internal" {
           }
 
           env {
-            name  = "GROPIUS_API_INTERNAL_API_TOKEN"
-            value = random_password.internal_api_token.result
+            name = "GROPIUS_API_INTERNAL_API_TOKEN"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret.login_service_secrets.metadata[0].name
+                key  = "internal_api_token"
+              }
+            }
           }
 
           env {
@@ -82,8 +82,13 @@ resource "kubernetes_deployment" "api_internal" {
           }
 
           env {
-            name  = "SPRING_NEO4J_AUTHENTICATION_PASSWORD"
-            value = random_password.neo4j_password.result
+            name = "SPRING_NEO4J_AUTHENTICATION_PASSWORD"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret.neo4j_password_secret.metadata[0].name
+                key  = "password"
+              }
+            }
           }
 
           env {

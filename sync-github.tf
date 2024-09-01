@@ -48,8 +48,13 @@ resource "kubernetes_deployment" "sync_github" {
           }
 
           env {
-            name  = "SPRING_NEO4J_AUTHENTICATION_PASSWORD"
-            value = random_password.neo4j_password.result
+            name = "SPRING_NEO4J_AUTHENTICATION_PASSWORD"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret.neo4j_password_secret.metadata[0].name
+                key  = "password"
+              }
+            }
           }
 
           env {
@@ -83,8 +88,13 @@ resource "kubernetes_deployment" "sync_github" {
           }
 
           env {
-            name  = "SPRING_DATA_MONGODB_PASSWORD"
-            value = random_password.mongo_root_password.result
+            name = "SPRING_DATA_MONGODB_PASSWORD"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret.mongo_password_secret.metadata[0].name
+                key  = "password"
+              }
+            }
           }
 
           env {
@@ -93,8 +103,13 @@ resource "kubernetes_deployment" "sync_github" {
           }
 
           env {
-            name  = "GROPIUS_SYNC_API_SECRET"
-            value = random_password.sync_api_secret.result
+            name = "GROPIUS_SYNC_API_SECRET"
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret.login_service_secrets.metadata[0].name
+                key  = "sync_api_secret"
+              }
+            }
           }
 
           liveness_probe {

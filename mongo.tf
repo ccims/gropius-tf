@@ -3,6 +3,16 @@ resource "random_password" "mongo_root_password" {
   special = false
 }
 
+resource "kubernetes_secret" "mongo_password_secret" {
+  metadata {
+    name      = "mongo-password"
+    namespace = kubernetes_namespace.gropius.metadata[0].name
+  }
+
+  data = {
+    password = random_password.mongo_root_password.result
+  }
+}
 
 resource "helm_release" "mongodb" {
   count = var.sync_github || var.sync_jira ? 1 : 0
