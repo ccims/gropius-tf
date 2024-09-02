@@ -28,7 +28,7 @@ resource "kubernetes_deployment" "sync_jira" {
       spec {
         container {
           name              = "sync-jira"
-          image             = "ghcr.io/ccims/gropius-jira:${var.gropius_version}"
+          image             = "ghcr.io/ccims/gropius-sync-jira:${var.gropius_version}"
           image_pull_policy = "Always"
 
 
@@ -113,8 +113,9 @@ resource "kubernetes_deployment" "sync_jira" {
           }
 
           liveness_probe {
-            exec {
-              command = ["true"]
+            http_get {
+              port = "8080"
+              path = "/health"
             }
             failure_threshold     = 20
             initial_delay_seconds = 120

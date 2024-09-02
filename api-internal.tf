@@ -104,7 +104,7 @@ resource "kubernetes_deployment" "api_internal" {
           liveness_probe {
             http_get {
               port = "8080"
-              path = "/graphiql"
+              path = "/health"
             }
             failure_threshold     = 20
             initial_delay_seconds = 120

@@ -28,7 +28,7 @@ resource "kubernetes_deployment" "sync_github" {
       spec {
         container {
           name              = "sync-github"
-          image             = "ghcr.io/ccims/gropius-github:${var.gropius_version}"
+          image             = "ghcr.io/ccims/gropius-sync-github:${var.gropius_version}"
           image_pull_policy = "Always"
 
 
@@ -113,8 +113,9 @@ resource "kubernetes_deployment" "sync_github" {
           }
 
           liveness_probe {
-            exec {
-              command = ["true"]
+            http_get {
+              port = "8080"
+              path = "/health"
             }
             failure_threshold     = 20
             initial_delay_seconds = 120
