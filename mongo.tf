@@ -15,8 +15,6 @@ resource "kubernetes_secret" "mongo_password_secret" {
 }
 
 resource "helm_release" "mongodb" {
-  count = var.sync_github || var.sync_jira ? 1 : 0
-
   name       = "mongodb"
   repository = "oci://registry-1.docker.io/bitnamicharts"
   chart      = "mongodb"
